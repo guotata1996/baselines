@@ -66,7 +66,7 @@ class StaticWorld:
                 rot_image =  pygame.transform.rotate(self.image_bot, degrees(float(angle)))
             w, h = rot_image.get_size()
 
-            screen.blit(rot_image, ((x - w/2) * self.zoom, (self.length - 1 - y - h/2) * self.zoom))
+            screen.blit(rot_image, (x * self.zoom, (self.length - 1 - y) * self.zoom))
 
 
 

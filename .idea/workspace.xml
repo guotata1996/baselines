@@ -2,21 +2,19 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="0ead33fd-3a1b-4868-8723-600194e0cae7" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PyGameMultiAgent/bot.py" beforeDir="false" afterPath="$PROJECT_DIR$/PyGameMultiAgent/bot.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/PyGameMultiAgent/gameserver.py" beforeDir="false" afterPath="$PROJECT_DIR$/PyGameMultiAgent/gameserver.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/PyGameMultiAgent/staticworld.py" beforeDir="false" afterPath="$PROJECT_DIR$/PyGameMultiAgent/staticworld.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Resources/sprite_blue.PNG" beforeDir="false" afterPath="$PROJECT_DIR$/Resources/sprite_blue.PNG" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/saves/log/0.0.monitor.csv" beforeDir="false" afterPath="$PROJECT_DIR$/saves/log/0.0.monitor.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/saves/log/0.1.monitor.csv" beforeDir="false" afterPath="$PROJECT_DIR$/saves/log/0.1.monitor.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/saves/log/0.2.monitor.csv" beforeDir="false" afterPath="$PROJECT_DIR$/saves/log/0.2.monitor.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/saves/log/0.3.monitor.csv" beforeDir="false" afterPath="$PROJECT_DIR$/saves/log/0.3.monitor.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/saves/log/0.4.monitor.csv" beforeDir="false" afterPath="$PROJECT_DIR$/saves/log/0.4.monitor.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/saves/log/0.5.monitor.csv" beforeDir="false" afterPath="$PROJECT_DIR$/saves/log/0.5.monitor.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/saves/log/0.6.monitor.csv" beforeDir="false" afterPath="$PROJECT_DIR$/saves/log/0.6.monitor.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/saves/log/0.7.monitor.csv" beforeDir="false" afterPath="$PROJECT_DIR$/saves/log/0.7.monitor.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/saves/log/log.txt" beforeDir="false" afterPath="$PROJECT_DIR$/saves/log/log.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/saves/log/progress.csv" beforeDir="false" afterPath="$PROJECT_DIR$/saves/log/progress.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/saves/log/0.0.monitor.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/saves/log/0.1.monitor.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/saves/log/0.2.monitor.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/saves/log/0.3.monitor.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/saves/log/0.4.monitor.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/saves/log/0.5.monitor.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/saves/log/0.6.monitor.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/saves/log/0.7.monitor.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/saves/log/0.8.monitor.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/saves/log/log.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/saves/log/progress.csv" beforeDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -25,7 +23,7 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="FileEditorManager">
-    <splitter split-orientation="horizontal" split-proportion="0.3199008">
+    <splitter split-orientation="horizontal" split-proportion="0.34779912">
       <split-first>
         <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
           <file pinned="false" current-in-tab="false">
@@ -43,8 +41,8 @@
           <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/PyGameMultiAgent/gameserver.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="211">
-                  <caret line="73" column="44" selection-start-line="73" selection-start-column="44" selection-end-line="73" selection-end-column="44" />
+                <state relative-caret-position="1738">
+                  <caret line="79" lean-forward="true" selection-start-line="79" selection-end-line="79" />
                   <folding>
                     <element signature="e#0#13#0" expanded="true" />
                   </folding>
@@ -76,8 +74,8 @@
           <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/PyGameMultiAgent/MyEnv.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="-535">
-                  <caret line="45" column="32" lean-forward="true" selection-start-line="45" selection-start-column="32" selection-end-line="45" selection-end-column="32" />
+                <state relative-caret-position="-738">
+                  <caret line="55" column="43" selection-start-line="55" selection-start-column="43" selection-end-line="55" selection-end-column="43" />
                   <folding>
                     <element signature="e#0#24#0" expanded="true" />
                   </folding>
@@ -88,8 +86,8 @@
           <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/PyGameMultiAgent/bot.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="-902">
-                  <caret line="25" column="16" selection-start-line="25" selection-start-column="16" selection-end-line="25" selection-end-column="16" />
+                <state relative-caret-position="1543">
+                  <caret line="76" column="24" lean-forward="true" selection-start-line="76" selection-start-column="24" selection-end-line="76" selection-end-column="24" />
                   <folding>
                     <element signature="e#0#13#0" expanded="true" />
                   </folding>
@@ -116,8 +114,8 @@
           <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/PyGameMultiAgent/staticworld.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="433">
-                  <caret line="68" column="43" lean-forward="true" selection-start-line="68" selection-start-column="43" selection-end-line="68" selection-end-column="43" />
+                <state relative-caret-position="88">
+                  <caret line="68" column="36" lean-forward="true" selection-start-line="68" selection-start-column="36" selection-end-line="68" selection-end-column="36" />
                 </state>
               </provider>
             </entry>
@@ -158,6 +156,9 @@
       <find>500</find>
       <find>gridLength</find>
       <find>get</find>
+      <find>GetAlertRadius</find>
+      <find>calc_players_position</find>
+      <find>starting_pos</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -205,6 +206,23 @@
               <item name="baselines" type="b2602c69:ProjectViewProjectNode" />
               <item name="baselines" type="462c0819:PsiDirectoryNode" />
               <item name="Resources" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="baselines" type="b2602c69:ProjectViewProjectNode" />
+              <item name="baselines" type="462c0819:PsiDirectoryNode" />
+              <item name="saves" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="baselines" type="b2602c69:ProjectViewProjectNode" />
+              <item name="baselines" type="462c0819:PsiDirectoryNode" />
+              <item name="saves" type="462c0819:PsiDirectoryNode" />
+              <item name="log" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="baselines" type="b2602c69:ProjectViewProjectNode" />
+              <item name="baselines" type="462c0819:PsiDirectoryNode" />
+              <item name="saves" type="462c0819:PsiDirectoryNode" />
+              <item name="model" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="baselines" type="b2602c69:ProjectViewProjectNode" />
@@ -344,7 +362,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.train">
+  <component name="RunManager" selected="Python.gameclient">
     <configuration name="Test" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="baselines" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -467,7 +485,7 @@
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.18980478" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.46746203" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -555,16 +573,6 @@
         <state relative-caret-position="-231" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/PyGameMultiAgent/MyEnv.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-535">
-          <caret line="45" column="32" lean-forward="true" selection-start-line="45" selection-start-column="32" selection-end-line="45" selection-end-column="32" />
-          <folding>
-            <element signature="e#0#24#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/PyGameMultiAgent/gameclient.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="396">
@@ -589,18 +597,28 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/PyGameMultiAgent/bot.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-902">
-          <caret line="25" column="16" selection-start-line="25" selection-start-column="16" selection-end-line="25" selection-end-column="16" />
+        <state relative-caret-position="1543">
+          <caret line="76" column="24" lean-forward="true" selection-start-line="76" selection-start-column="24" selection-end-line="76" selection-end-column="24" />
           <folding>
             <element signature="e#0#13#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/PyGameMultiAgent/MyEnv.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-738">
+          <caret line="55" column="43" selection-start-line="55" selection-start-column="43" selection-end-line="55" selection-end-column="43" />
+          <folding>
+            <element signature="e#0#24#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/PyGameMultiAgent/gameserver.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="211">
-          <caret line="73" column="44" selection-start-line="73" selection-start-column="44" selection-end-line="73" selection-end-column="44" />
+        <state relative-caret-position="1738">
+          <caret line="79" lean-forward="true" selection-start-line="79" selection-end-line="79" />
           <folding>
             <element signature="e#0#13#0" expanded="true" />
           </folding>
@@ -609,8 +627,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/PyGameMultiAgent/staticworld.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="433">
-          <caret line="68" column="43" lean-forward="true" selection-start-line="68" selection-start-column="43" selection-end-line="68" selection-end-column="43" />
+        <state relative-caret-position="88">
+          <caret line="68" column="36" lean-forward="true" selection-start-line="68" selection-start-column="36" selection-end-line="68" selection-end-column="36" />
         </state>
       </provider>
     </entry>

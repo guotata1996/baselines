@@ -93,6 +93,7 @@ class GameServer(object):
         return start_position
 
     def init_players_pose(self):
+        np.random.shuffle(self.starting_pos)
         for k in zip(self.players.keys(), self.starting_pos):
             self.players[k[0]] = *(k[1]), self.players[k[0]][3]
 
