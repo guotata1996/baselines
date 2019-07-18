@@ -6,17 +6,17 @@ import pygame
 #Passable = 0 Wall = 1 #Zombie = 2
 
 class StaticWorld:
-    def __init__(self, csv_path):
-        self.gridLength = 10
-        self.perception_grids = 30
-        self.zoom = 10
+    gridLength = 2
+    perception_grids = 15
+    zoom = 8
 
-        self.raw_data = np.asarray(read_csv(csv_path, skipinitialspace=True, header=None).values)[:,:-1] #dtype is char
-        self.data = np.zeros_like(self.raw_data)
+    def __init__(self, csv_path):
+        raw_data = np.asarray(read_csv(csv_path, skipinitialspace=True, header=None).values)[:,:-1] #dtype is char
+        self.data = np.zeros_like(raw_data)
 
         for i in range(self.data.shape[0]):
             for j in range(self.data.shape[1]):
-                if self.raw_data[i][j] == '#':
+                if raw_data[i][j] == '#':
                     self.data[i][j] = 1
 
         self.length = self.data.shape[0] * self.gridLength
@@ -48,10 +48,15 @@ class StaticWorld:
             self.image_zombie = pygame.image.load("../Resources/sprite.PNG").convert_alpha()
             self.image_bot = pygame.image.load("../Resources/sprite_blue.png")
 
+            self.image_wall = pygame.transform.rotozoom(self.image_wall, 0, self.zoom * self.gridLength / 10)
+            self.image_zombie = pygame.transform.rotozoom(self.image_zombie, 0, self.zoom / 10)
+            self.image_bot = pygame.transform.rotozoom(self.image_bot, 0, self.zoom  / 10)
+
+
         for i in range(self.data.shape[1]):
             for j in range(self.data.shape[0]):
                 if self.data[j][i] == 1:
-                    screen.blit(self.image_wall, (i * self.gridLength, j * self.gridLength))
+                    screen.blit(self.image_wall, (i * self.gridLength * self.zoom, j * self.gridLength * self.zoom))
 
         for pos in list(poses):
             x, y, angle, tag = pos
@@ -60,7 +65,8 @@ class StaticWorld:
             else:
                 rot_image =  pygame.transform.rotate(self.image_bot, degrees(float(angle)))
             w, h = rot_image.get_size()
-            screen.blit(rot_image, (int(float(x) - w / 2), self.length - 1 - int(float(y) + h / 2)))
+
+            screen.blit(rot_image, ((x - w/2) * self.zoom, (self.length - 1 - y - h/2) * self.zoom))
 
 
 

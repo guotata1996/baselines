@@ -50,8 +50,8 @@ class GameServer(object):
             angle = pos[2]
             _x = pos[0] + stepsize * cos(angle)
             _y = pos[1] + stepsize * sin(angle)
-            _x = np.clip(_x, 0, 500)
-            _y = np.clip(_y, 0, 500)
+            _x = np.clip(_x, 0, self.world.width)
+            _y = np.clip(_y, 0, self.world.length)
             new_pos = (_x, _y, angle, pos[3])
             if self.world[new_pos[:2]] == 0:
                 self.players[player] = new_pos
@@ -76,7 +76,7 @@ class GameServer(object):
 
         for p in range(cnt):
             while True:
-                new_pose = (np.random.randint(50, 200), np.random.randint(50, 200), np.random.randint(0, 359))
+                new_pose = (np.random.randint(0, self.world.width // 2), np.random.randint(0, self.world.length // 2), np.random.randint(0, 359))
 
                 if self.world[(new_pose[0], new_pose[1])] == 1:
                     continue
@@ -111,7 +111,7 @@ class GameServer(object):
 
     def _visualize_global(self):
         clock = pygame.time.Clock()
-        screen = pygame.display.set_mode((self.world.length, self.world.width))
+        screen = pygame.display.set_mode((self.world.zoom * self.world.length, self.world.zoom * self.world.width))
         running = True
         while running:
             clock.tick(30)
@@ -142,9 +142,9 @@ class GameServer(object):
                             cmd = msg[0]
                             if cmd == "c":  # New Connection
                                 if msg[1] == "z": # New Connection from zombie (model)
-                                    self.players[addr] = (300, 250, 0, 0)
+                                    self.players[addr] = (0, 0, 0, 0)
                                 else:
-                                    self.players[addr] = (300, 250, 0, 1)
+                                    self.players[addr] = (0, 0, 0, 1)
                                 self.init_players_pose()
                             elif cmd == "u":  # Movement Update
                                 if len(msg) >= 2 and addr in self.players:

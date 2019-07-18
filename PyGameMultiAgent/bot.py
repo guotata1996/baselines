@@ -23,7 +23,7 @@ class Bot(object):
 
     @staticmethod
     def GetAlertRadius():
-        return 15
+        return 6
 
     def run(self):
 
