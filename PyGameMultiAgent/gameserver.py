@@ -24,7 +24,7 @@ import _thread
 # pos: x,y,angle,tag (tag==0: zombie_model, tag==1:bot)
 
 class GameServer(object):
-    def __init__(self, port=9009, visualize_global = False):
+    def __init__(self, port=9009, visualize_global = True):
         self.listener = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         # Bind to localhost - set to external ip to connect from other computers
         self.listener.bind(("127.0.0.1", port))
@@ -34,7 +34,7 @@ class GameServer(object):
         self.angle_stepsize = 0.1
         self.players = {}
         self.world = StaticWorld('../Maps/map_0.csv')
-        self.starting_pos = self.calc_players_position()
+        self.starting_pos_set = self.calc_players_position()
 
         self.visualize = visualize_global
 
@@ -72,29 +72,37 @@ class GameServer(object):
             pass
 
     def calc_players_position(self, cnt = 16):
-        start_position = []
+        set = []
 
-        for p in range(cnt):
-            while True:
-                new_pose = (np.random.randint(0, self.world.width // 2), np.random.randint(0, self.world.length // 2), np.random.randint(0, 359))
+        for i in [(0, self.world.width // 2), (self.world.width // 2, self.world.width)]:
+            for j in [(0, self.world.length // 2), (self.world.length // 2, self.world.length)]:
+                start_position = []
 
-                if self.world[(new_pose[0], new_pose[1])] == 1:
-                    continue
+                for p in range(cnt):
+                    while True:
+                        new_pose = (np.random.randint(*i), np.random.randint(*j), np.random.randint(0, 359))
 
-                noncollision = True
-                for existing_pose in start_position:
-                    if abs(existing_pose[0] - new_pose[0]) + abs(existing_pose[1] - new_pose[1]) < 8:
-                        noncollision = False
-                        break
+                        if self.world[(new_pose[0], new_pose[1])] == 1:
+                            continue
 
-                if noncollision:
-                    start_position.append(new_pose)
-                    break
-        return start_position
+                        noncollision = True
+                        for existing_pose in start_position:
+                            if abs(existing_pose[0] - new_pose[0]) + abs(existing_pose[1] - new_pose[1]) < 8:
+                                noncollision = False
+                                break
+
+                        if noncollision:
+                            start_position.append(new_pose)
+                            break
+                set.append(start_position)
+
+        return set
 
     def init_players_pose(self):
-        np.random.shuffle(self.starting_pos)
-        for k in zip(self.players.keys(), self.starting_pos):
+
+        current_section = self.starting_pos_set[np.random.randint(len(self.starting_pos_set))]
+        np.random.shuffle(current_section)
+        for k in zip(self.players.keys(), current_section):
             self.players[k[0]] = *(k[1]), self.players[k[0]][3]
 
     def _send_to_client(self):

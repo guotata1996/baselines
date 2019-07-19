@@ -50,7 +50,7 @@ class StaticWorld:
 
             self.image_wall = pygame.transform.rotozoom(self.image_wall, 0, self.zoom * self.gridLength / 10)
             self.image_zombie = pygame.transform.rotozoom(self.image_zombie, 0, self.zoom / 10)
-            self.image_bot = pygame.transform.rotozoom(self.image_bot, 0, self.zoom  / 10)
+            self.image_bot = pygame.transform.rotozoom(self.image_bot, 0, self.zoom / 10)
 
 
         for i in range(self.data.shape[1]):
