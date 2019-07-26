@@ -6,8 +6,8 @@ import pygame
 #Passable = 0 Wall = 1 #Zombie = 2
 
 class StaticWorld:
-    gridLength = 2
-    perception_grids = 15
+    gridLength = 2  # how many GRIDs does a grid in csv map represent
+    perception_grids = 15 # how far in GRIDs can actor see
     zoom = 8
 
     def __init__(self, csv_path):
@@ -41,7 +41,7 @@ class StaticWorld:
             return 1
         return self.data[grid_x, grid_y]
 
-    def draw_global(self, screen, poses):
+    def draw_global(self, screen, poses_dict, rewards_dict):
         screen.fill(pygame.Color("black"))
         if self.image_wall is None:
             self.image_wall = pygame.image.load("../Resources/wall.png").convert_alpha()
@@ -58,16 +58,26 @@ class StaticWorld:
                 if self.data[j][i] == 1:
                     screen.blit(self.image_wall, (i * self.gridLength * self.zoom, j * self.gridLength * self.zoom))
 
-        for pos in list(poses):
+        for addr in list(poses_dict.keys()):
+            pos = poses_dict[addr]
+
             x, y, angle, tag = pos
             if tag == 0:
                 rot_image = pygame.transform.rotate(self.image_zombie, degrees(float(angle)))
             else:
                 rot_image =  pygame.transform.rotate(self.image_bot, degrees(float(angle)))
-            w, h = rot_image.get_size()
 
-            screen.blit(rot_image, (x * self.zoom, (self.length - 1 - y) * self.zoom))
+            actor_position = (int(x * self.zoom), int((self.length - 1 - y) * self.zoom))
+            screen.blit(rot_image, actor_position)
 
+            if tag == 0 and addr in rewards_dict:
+                rew = rewards_dict[addr]
+                lo_rew_color = np.array([0, 0, 255])
+                hi_rew_color = np.array([255, 0, 0])
+                rew = 0.5 * np.clip(rew, -1, 1) + 0.5   #normalize to [0,1]
+                interpolated_color = (1 - rew) * lo_rew_color + rew * hi_rew_color
+
+                pygame.draw.circle(screen, interpolated_color, actor_position, int(self.zoom * self.perception_grids), 1)
 
 
     # free = 0

@@ -23,8 +23,10 @@ class ZombieChasePlayerEnv(Env):
 
         self.action_space = Discrete(4)
         self.observation_space = Box(low = 0, high=3, shape=(self.world.local_length, self.world.local_length, 1), dtype=np.uint8)
+
         self.saved_self_pose = None
         self.saved_all_zombie_pose = None
+        self.saved_rew = 0.0
 
         self.screen = None
 
@@ -49,34 +51,57 @@ class ZombieChasePlayerEnv(Env):
                 self_pos = (x, y, angle)
             AllZombiePose.append((x, y, angle, tag))
 
-        self.saved_self_pose = self_pos
-        self.saved_all_zombie_pose = AllZombiePose
         return self_pos, AllZombiePose
 
-    def _calculate_reward(self, self_pos, AllZombiePose):
-        x, y, _= self_pos
-        total_rew = 0
-        for actor in AllZombiePose:
-            ax, ay, aangle, atag = actor
-            if atag == 1 and (ax - x)**2 + (ay - y)**2 < Bot.GetAlertRadius() * Bot.GetAlertRadius():
-                total_rew += 1 / max((ax - x)**2 + (ay - y)**2, 0.1)
-                if (ax - x)**2 + (ay - y)**2 < 4:
-                    return total_rew, True
-        return total_rew, False
+    def _calculate_reward(self, self_pos, AllZombiePose, last_self_pose, last_allZombiePose):
+        if last_allZombiePose is None:
+            return 0, False
+
+        old_distance = self._get_closest_bot_distance(last_self_pose, last_allZombiePose)
+        curr_distance = self._get_closest_bot_distance(self_pos, AllZombiePose)
+
+        rew = 0
+        if max(old_distance, curr_distance) < self.world.perception_grids:
+            rew += (curr_distance - old_distance) * 0.5 # range = [-1,1]
+
+        if curr_distance < 1:
+            rew += 10
+            return rew, True
+
+        return rew, False
+
+    def _get_closest_bot_distance(self, self_pos, allZombiePose):
+        x, y, _ = self_pos
+        closest_dist_sqr = 100000000
+        for actor in allZombiePose:
+            ax, ay, _, atag = actor
+            if atag == 1:
+                dist_sqr = (ax - x)**2 + (ay - y)**2
+                if dist_sqr < closest_dist_sqr:
+                    closest_dist_sqr = dist_sqr
+        return np.sqrt(closest_dist_sqr)
 
 
     #returns (obs, reward, finish)
     def step(self, action):
+        cmd = None
         if action == 0:
-            self.conn.sendto("uu".encode('utf-8'), (self.addr, self.serverport))
+            cmd = "uu"
         elif action == 1:
-            self.conn.sendto("ui".encode('utf-8'), (self.addr, self.serverport))
+            cmd = "ui"
         elif action == 2:
-            self.conn.sendto("ul".encode('utf-8'), (self.addr, self.serverport))
+            cmd = "ul"
         else:
-            self.conn.sendto("ur".encode('utf-8'), (self.addr, self.serverport))
+            cmd = "ur"
+        cmd += str(self.saved_rew)
+        self.conn.sendto(cmd.encode('utf-8'), (self.addr, self.serverport))
+
         self_pos, AllZombiePos = self._fetch_pos_from_server()
-        rew, done = self._calculate_reward(self_pos, AllZombiePos)
+        rew, done = self._calculate_reward(self_pos, AllZombiePos, self.saved_self_pose, self.saved_all_zombie_pose)
+        self.saved_self_pose = self_pos
+        self.saved_all_zombie_pose = AllZombiePos
+        self.saved_rew = rew
+
         if done or self.stepcount == 4000:
             self.reset()
 

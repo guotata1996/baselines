@@ -8,6 +8,8 @@ import sys
 from baselines.PyGameMultiAgent.staticworld import StaticWorld
 
 class Bot(object):
+    alertRadius = 6
+
     def __init__(self, addr="127.0.0.1", serverport=9009):
         self.botport = random.randrange(8000, 8999)
         self.conn = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -20,10 +22,6 @@ class Bot(object):
 
         self.world = StaticWorld('Maps/map_0.csv')
         self.running = True
-
-    @staticmethod
-    def GetAlertRadius():
-        return 6
 
     def run(self):
 
@@ -79,7 +77,7 @@ class Bot(object):
             for sector in range(center_sector - 11, center_sector + 11):
                 dir_score[sector % 24] -= 1 / ((abs(sector - center_sector) + 1) * z_distance_sqr)   #score
 
-            if z_distance_sqr < Bot.GetAlertRadius() * Bot.GetAlertRadius():
+            if z_distance_sqr < Bot.alertRadius * Bot.alertRadius:
                 zombie_in_sight = True
 
         if not zombie_in_sight:

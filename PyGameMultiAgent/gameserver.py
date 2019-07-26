@@ -6,7 +6,9 @@ import numpy as np
 from baselines.PyGameMultiAgent.staticworld import StaticWorld
 import pygame
 import pygame.locals
+import time
 import _thread
+import sys
 
 # Messages:
 #  Client->Server
@@ -32,16 +34,23 @@ class GameServer(object):
         self.write_list = []
 
         self.angle_stepsize = 0.1
-        self.players = {}
+        self.players_pose = {}
+        self.players_ready = {}
+        self.players_reward = {}
+
         self.world = StaticWorld('../Maps/map_0.csv')
         self.starting_pos_set = self.calc_players_position()
 
-        self.visualize = visualize_global
+        self.screen = pygame.display.set_mode((self.world.zoom * self.world.length, self.world.zoom * self.world.width)) \
+            if visualize_global else None
+
+
+
 
     def do_movement(self, mv, player):
 
-        pos = self.players[player]
-        if self.players[player][3] == 0:
+        pos = self.players_pose[player]
+        if self.players_pose[player][3] == 0:
             stepsize = 1
         else:
             stepsize = 0.5
@@ -54,19 +63,19 @@ class GameServer(object):
             _y = np.clip(_y, 0, self.world.length)
             new_pos = (_x, _y, angle, pos[3])
             if self.world[new_pos[:2]] == 0:
-                self.players[player] = new_pos
+                self.players_pose[player] = new_pos
 
         elif mv == "l":
             angle = pos[2] + self.angle_stepsize
             if angle > 2 * PI:
                 angle -= 2 * PI
-            self.players[player] = (pos[0], pos[1], angle, pos[3])
+            self.players_pose[player] = (pos[0], pos[1], angle, pos[3])
 
         elif mv == "r":
             angle = pos[2] - self.angle_stepsize
             if angle < 0:
                 angle += 2 * PI
-            self.players[player] = (pos[0], pos[1], angle, pos[3])
+            self.players_pose[player] = (pos[0], pos[1], angle, pos[3])
 
         else:  # stand idle
             pass
@@ -102,43 +111,32 @@ class GameServer(object):
 
         current_section = self.starting_pos_set[np.random.randint(len(self.starting_pos_set))]
         np.random.shuffle(current_section)
-        for k in zip(self.players.keys(), current_section):
-            self.players[k[0]] = *(k[1]), self.players[k[0]][3]
+        for k in zip(self.players_pose.keys(), current_section):
+            self.players_pose[k[0]] = *(k[1]), self.players_pose[k[0]][3]
 
     def _send_to_client(self):
-        clock = pygame.time.Clock()
-        while True:
-            clock.tick(24)
-            for player in list(self.players):
-                send = []
-                for pos in list(self.players):
-                    if player == pos:
-                        send.insert(0, "{0},{1},{2},{3}".format(*self.players[pos]))
-                    else:
-                        send.append("{0},{1},{2},{3}".format(*self.players[pos]))
-                self.listener.sendto('|'.join(send).encode('utf-8'), player)
-
-    def _visualize_global(self):
-        clock = pygame.time.Clock()
-        screen = pygame.display.set_mode((self.world.zoom * self.world.length, self.world.zoom * self.world.width))
-        running = True
-        while running:
-            clock.tick(30)
-            self.world.draw_global(screen, self.players.values())
-
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT or event.type == pygame.locals.QUIT:
-                    pygame.quit()
-            pygame.display.update()
+        for player in list(self.players_pose):
+            send = []
+            for pos in list(self.players_pose):
+                if player == pos:
+                    send.insert(0, "{0},{1},{2},{3}".format(*self.players_pose[pos]))
+                else:
+                    send.append("{0},{1},{2},{3}".format(*self.players_pose[pos]))
+            self.listener.sendto('|'.join(send).encode('utf-8'), player)
 
     def run(self):
-        print("Waiting...")
-        _thread.start_new_thread(self._send_to_client, ())
-        if self.visualize:
-            _thread.start_new_thread(self._visualize_global, ())
-
+        last_updated_time = time.time()
         try:
             while True:
+                if time.time() - last_updated_time > 0.03:
+                    self.world.draw_global(self.screen, self.players_pose, self.players_reward)
+                    pygame.display.update()
+                    last_updated_time = time.time()
+
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT or event.type == pygame.locals.QUIT:
+                        pygame.quit()
+                pygame.display.update()
 
                 readable, writable, exceptional = (
                     select.select(self.read_list, self.write_list, [])
@@ -151,19 +149,30 @@ class GameServer(object):
                             cmd = msg[0]
                             if cmd == "c":  # New Connection
                                 if msg[1] == "z": # New Connection from zombie (model)
-                                    self.players[addr] = (0, 0, 0, 0)
+                                    self.players_pose[addr] = (0, 0, 0, 0)
                                 else:
-                                    self.players[addr] = (0, 0, 0, 1)
+                                    self.players_pose[addr] = (0, 0, 0, 1)
+
+                                self.players_ready[addr] = True
                                 self.init_players_pose()
                             elif cmd == "u":  # Movement Update
-                                if len(msg) >= 2 and addr in self.players:
+                                if len(msg) >= 2 and addr in self.players_pose:
                                     # Second char of message is direction (udlr)
                                     self.do_movement(msg[1], addr)
+                                    self.players_ready[addr] = True
+                                    if len(msg) > 2:
+                                        self.players_reward[addr] = float(msg[2:])
+
                             elif cmd == "d":  # Player Quitting
-                                if addr in self.players:
-                                    del self.players[addr]
+                                if addr in self.players_pose:
+                                    del self.players_pose[addr]
+                                    del self.players_ready[addr]
                             else:
                                 print ("Unexpected: {0}".format(msg))
+
+                            allready = all(elem for elem in self.players_ready.values())
+                            if allready:
+                                self._send_to_client()
 
 
         except KeyboardInterrupt as e:
