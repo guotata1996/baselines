@@ -26,7 +26,7 @@ import sys
 # pos: x,y,angle,tag (tag==0: zombie_model, tag==1:bot)
 
 class GameServer(object):
-    def __init__(self, port=9009, visualize_global = True):
+    def __init__(self, port=9009, visualize_global = False):
         self.listener = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         # Bind to localhost - set to external ip to connect from other computers
         self.listener.bind(("127.0.0.1", port))
@@ -128,15 +128,16 @@ class GameServer(object):
         last_updated_time = time.time()
         try:
             while True:
-                if time.time() - last_updated_time > 0.03:
-                    self.world.draw_global(self.screen, self.players_pose, self.players_reward)
-                    pygame.display.update()
-                    last_updated_time = time.time()
+                if self.screen is not None:
+                    if time.time() - last_updated_time > 0.03:
+                        self.world.draw_global(self.screen, self.players_pose, self.players_reward)
+                        pygame.display.update()
+                        last_updated_time = time.time()
 
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT or event.type == pygame.locals.QUIT:
-                        pygame.quit()
-                pygame.display.update()
+                    for event in pygame.event.get():
+                        if event.type == pygame.QUIT or event.type == pygame.locals.QUIT:
+                            pygame.quit()
+                    pygame.display.update()
 
                 readable, writable, exceptional = (
                     select.select(self.read_list, self.write_list, [])
@@ -167,6 +168,9 @@ class GameServer(object):
                                 if addr in self.players_pose:
                                     del self.players_pose[addr]
                                     del self.players_ready[addr]
+                            elif cmd == "r":
+                                self.players_ready[addr] = True
+                                self.init_players_pose()
                             else:
                                 print ("Unexpected: {0}".format(msg))
 

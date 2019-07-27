@@ -20,6 +20,7 @@ class ZombieChasePlayerEnv(Env):
         self.conn.bind(("127.0.0.1", self.clientport))
         self.addr = "127.0.0.1"
         self.serverport = 9009
+        self.conn.sendto("cz".encode('utf-8'), (self.addr, self.serverport))
 
         self.action_space = Discrete(4)
         self.observation_space = Box(low = 0, high=3, shape=(self.world.local_length, self.world.local_length, 1), dtype=np.uint8)
@@ -32,7 +33,6 @@ class ZombieChasePlayerEnv(Env):
 
         self.stepcount = 0
 
-        print('making MyEnv...,')
 
     #block if no data received
     def _fetch_pos_from_server(self):
@@ -62,7 +62,7 @@ class ZombieChasePlayerEnv(Env):
 
         rew = 0
         if max(old_distance, curr_distance) < self.world.perception_grids:
-            rew += (curr_distance - old_distance) * 0.5 # range = [-1,1]
+            rew += (old_distance - curr_distance) * 0.5 # range = [-1,1]
 
         if curr_distance < 1:
             rew += 10
@@ -111,8 +111,7 @@ class ZombieChasePlayerEnv(Env):
 
 
     def reset(self):
-        self.conn.sendto("d".encode('utf-8'), (self.addr, self.serverport))
-        self.conn.sendto("cz".encode('utf-8'), (self.addr, self.serverport))
+        self.conn.sendto("r".encode('utf-8'), (self.addr, self.serverport))
         self_pos, AllZombiePos = self._fetch_pos_from_server()
         self.stepcount = 0
         return self.world.to_local_obs(self_pos, AllZombiePos)

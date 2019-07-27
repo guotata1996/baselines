@@ -20,13 +20,13 @@ class Bot(object):
         self.read_list = [self.conn]
         self.write_list = []
 
-        self.world = StaticWorld('Maps/map_0.csv')
+        self.world = StaticWorld('../Maps/map_0.csv')
         self.running = True
 
     def run(self):
 
         clock = pygame.time.Clock()
-        tickspeed = 30
+        tickspeed = 100
 
         self.conn.sendto("cb".encode('utf-8'), (self.addr, self.serverport))
 
