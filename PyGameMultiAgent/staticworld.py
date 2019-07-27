@@ -74,7 +74,7 @@ class StaticWorld:
                 rew = rewards_dict[addr]
                 lo_rew_color = np.array([0, 0, 255])
                 hi_rew_color = np.array([255, 0, 0])
-                rew = 0.5 * np.clip(rew, -1, 1) + 0.5   #normalize to [0,1]
+                rew = np.clip(rew, -1, 1)
                 interpolated_color = (1 - rew) * lo_rew_color + rew * hi_rew_color
 
                 pygame.draw.circle(screen, interpolated_color, actor_position, int(self.zoom * self.perception_grids), 1)
@@ -106,6 +106,7 @@ class StaticWorld:
             y1 -= y
             local_frame_x1 = int(sin(angle) * x1 - cos(angle) * y1)
             local_frame_y1 = int(cos(angle) * x1 + sin(angle) * y1)
+
             if -self.perception_grids <= local_frame_x1 <= self.perception_grids and \
                     -self.perception_grids <= local_frame_y1 <= self.perception_grids:
                 obs[local_frame_x1 + self.perception_grids][self.perception_grids - local_frame_y1] = tag + 2
