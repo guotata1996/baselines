@@ -75,7 +75,7 @@ class ZombieChasePlayerEnv(Env):
 
         # reward for staying near
         if curr_distance < Bot.alertRadius:
-            rew += 0.5
+            rew += 0.5 / min(curr_distance - 2, 1)
 
         # reward for catching
         if curr_distance < 2:

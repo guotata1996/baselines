@@ -40,7 +40,6 @@ class GameServer(object):
         self.players_reward = {}
 
         self.world = StaticWorld('../Maps/map_0.csv')
-        self.starting_pos_set = self.calc_players_position()
 
         self.screen = pygame.display.set_mode((self.world.zoom * self.world.length, self.world.zoom * self.world.width)) \
             if sys.platform.startswith('win') else None
@@ -80,38 +79,30 @@ class GameServer(object):
         else:  # stand idle
             pass
 
-    def calc_players_position(self, cnt = 16):
-        set = []
-
-        for i in [(0, self.world.width // 2), (self.world.width // 2, self.world.width)]:
-            for j in [(0, self.world.length // 2), (self.world.length // 2, self.world.length)]:
-                start_position = []
-
-                for p in range(cnt):
-                    while True:
-                        new_pose = (np.random.randint(*i), np.random.randint(*j), np.random.random() * 2 * PI)
-
-                        if self.world[(new_pose[0], new_pose[1])] == 1:
-                            continue
-
-                        noncollision = True
-                        for existing_pose in start_position:
-                            if abs(existing_pose[0] - new_pose[0]) + abs(existing_pose[1] - new_pose[1]) < 8:
-                                noncollision = False
-                                break
-
-                        if noncollision:
-                            start_position.append(new_pose)
-                            break
-                set.append(start_position)
-
-        return set
-
     def init_players_pose(self):
+        section_x = [(0, self.world.width // 2), (self.world.width // 2, self.world.width)][np.random.randint(0, 2)]
+        section_y = [(0, self.world.length // 2), (self.world.length // 2, self.world.length)][np.random.randint(0, 2)]
 
-        current_section = self.starting_pos_set[np.random.randint(len(self.starting_pos_set))]
-        np.random.shuffle(current_section)
-        for k in zip(self.players_pose.keys(), current_section):
+        start_position = []
+
+        for p in range(len(self.players_pose)):
+            while True:
+                new_pose = (np.random.randint(*section_x), np.random.randint(*section_y), np.random.random() * 2 * PI)
+
+                if self.world[(new_pose[0], new_pose[1])] == 1:
+                    continue
+
+                noncollision = True
+                for existing_pose in start_position:
+                    if abs(existing_pose[0] - new_pose[0]) + abs(existing_pose[1] - new_pose[1]) < 8:
+                        noncollision = False
+                        break
+
+                if noncollision:
+                    start_position.append(new_pose)
+                    break
+
+        for k in zip(self.players_pose.keys(), start_position):
             self.players_pose[k[0]] = *(k[1]), self.players_pose[k[0]][3]
 
     def _send_to_client(self):
