@@ -1,6 +1,6 @@
 import numpy as np
 from pandas import read_csv
-from math import floor, degrees, sin, cos, radians
+from math import floor, degrees, sin, cos, radians, atan2
 import pygame
 
 #Passable = 0 Wall = 1 #Zombie = 2
@@ -9,6 +9,8 @@ class StaticWorld:
     gridLength = 2  # how many GRIDs does a grid in csv map represent
     perception_grids = 15 # how far in GRIDs can actor see
     zoom = 8
+
+    radar_blocks = 24
 
     def __init__(self, csv_path):
         raw_data = np.asarray(read_csv(csv_path, skipinitialspace=True, header=None).values)[:,:-1] #dtype is char
@@ -30,6 +32,9 @@ class StaticWorld:
 
         self.local_length = (self.perception_grids * 2 + 1)
         self.local_width = (self.perception_grids * 2 + 1)
+
+        self.radar_length = StaticWorld.radar_blocks * 2
+
 
     def __getitem__(self, tup_item):
         _x, _y = tup_item
@@ -112,6 +117,47 @@ class StaticWorld:
                 obs[local_frame_x1 + self.perception_grids][self.perception_grids - local_frame_y1] = tag + 2
 
         return np.expand_dims(obs, axis=2)
+
+
+    def to_local_radar_obs(self, pos, allZombiePose):
+        x, y, angle = pos
+        radar_block_angle = 360 / StaticWorld.radar_blocks
+
+        obs = np.zeros((StaticWorld.radar_blocks), dtype = np.int)
+        depth = np.ones((StaticWorld.radar_blocks), dtype = np.float) * 10000
+
+        for z in allZombiePose:
+            zx, zy, angle1, tag = z
+            if zx == x and zy == y:
+                continue
+
+            relative_angle = degrees(atan2(zy - y, zx - x))
+            if relative_angle < 0:
+                relative_angle += 360 #[0, 360]
+            center_sector = round(relative_angle / radar_block_angle) % 24
+
+            z_distance = np.sqrt(np.square(zx - x) + np.square(zy - y))
+            if z_distance < StaticWorld.perception_grids and z_distance < depth[center_sector]:
+                obs[center_sector] = tag + 2  # 2 or 3
+                depth[center_sector] = z_distance
+
+        for s in range(StaticWorld.radar_blocks):
+            wangle = s * radar_block_angle
+            wallDistance = self.rayCastWall((x, y), wangle)
+            if wallDistance < StaticWorld.perception_grids and wallDistance < depth[s]:
+                obs[s] = 1
+                depth[s] = wallDistance
+
+        # normalize depth
+        depth = np.minimum(1, depth / self.perception_grids)
+
+        # roll to front view
+        self_pos_block = round(degrees(angle) / radar_block_angle)
+        obs = np.roll(obs, -self_pos_block, 0)
+        depth = np.roll(depth, -self_pos_block, 0)
+
+        return np.expand_dims(np.concatenate([obs, depth]), axis=1)
+
 
 
     # also shows rotation

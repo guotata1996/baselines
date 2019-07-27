@@ -23,7 +23,7 @@ class ZombieChasePlayerEnv(Env):
         self.conn.sendto("cz".encode('utf-8'), (self.addr, self.serverport))
 
         self.action_space = Discrete(4)
-        self.observation_space = Box(low = 0, high=3, shape=(self.world.local_length, self.world.local_length, 1), dtype=np.uint8)
+        self.observation_space = Box(low = 0, high=3, shape=(self.world.radar_length, 1), dtype=np.float)
 
         self.saved_self_pose = None
         self.saved_all_zombie_pose = None
@@ -61,6 +61,7 @@ class ZombieChasePlayerEnv(Env):
         curr_distance = self._get_closest_bot_distance(self_pos, AllZombiePose)
 
         rew = 0
+
         # reward for approaching target
         if max(old_distance, curr_distance) < self.world.perception_grids:
             if curr_distance < old_distance:
@@ -74,7 +75,7 @@ class ZombieChasePlayerEnv(Env):
 
         # reward for staying near
         if curr_distance < Bot.alertRadius:
-            rew += 1
+            rew += 0.5
 
         # reward for catching
         if curr_distance < 2:
@@ -120,14 +121,15 @@ class ZombieChasePlayerEnv(Env):
 
         self.stepcount += 1
 
-        return self.world.to_local_obs(self_pos, AllZombiePos), rew, done, {'episode': {'r':rew, 'l':self.stepcount}}
 
+        # return self.world.to_local_obs(self_pos, AllZombiePos), rew, done, {'episode': {'r':rew, 'l':self.stepcount}}
+        return self.world.to_local_radar_obs(self_pos, AllZombiePos), rew, done, {'episode': {'r': rew, 'l': self.stepcount}}
 
     def reset(self):
         self.conn.sendto("r".encode('utf-8'), (self.addr, self.serverport))
         self_pos, AllZombiePos = self._fetch_pos_from_server()
         self.stepcount = 0
-        return self.world.to_local_obs(self_pos, AllZombiePos)
+        return self.world.to_local_radar_obs(self_pos, AllZombiePos)
 
     metadata = {'render.modes': ['human', 'rgb_array']}
 

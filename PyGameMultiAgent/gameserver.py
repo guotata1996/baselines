@@ -7,6 +7,7 @@ from baselines.PyGameMultiAgent.staticworld import StaticWorld
 import pygame
 import pygame.locals
 import time
+import sys
 import _thread
 import sys
 
@@ -26,7 +27,7 @@ import sys
 # pos: x,y,angle,tag (tag==0: zombie_model, tag==1:bot)
 
 class GameServer(object):
-    def __init__(self, port=9009, visualize_global = True):
+    def __init__(self, port=9009, debug_mode = False):
         self.listener = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         # Bind to localhost - set to external ip to connect from other computers
         self.listener.bind(("127.0.0.1", port))
@@ -42,9 +43,8 @@ class GameServer(object):
         self.starting_pos_set = self.calc_players_position()
 
         self.screen = pygame.display.set_mode((self.world.zoom * self.world.length, self.world.zoom * self.world.width)) \
-            if visualize_global else None
-
-
+            if sys.platform.startswith('win') else None
+        self.debug_mode = debug_mode and sys.platform.startswith('win')
 
 
     def do_movement(self, mv, player):
@@ -89,7 +89,7 @@ class GameServer(object):
 
                 for p in range(cnt):
                     while True:
-                        new_pose = (np.random.randint(*i), np.random.randint(*j), np.random.randint(0, 359))
+                        new_pose = (np.random.randint(*i), np.random.randint(*j), np.random.random() * 2 * PI)
 
                         if self.world[(new_pose[0], new_pose[1])] == 1:
                             continue
@@ -126,10 +126,17 @@ class GameServer(object):
 
     def run(self):
         last_updated_time = time.time()
+        clock = pygame.time.Clock()
         try:
             while True:
+
                 if self.screen is not None:
-                    if time.time() - last_updated_time > 0.03:
+                    if self.debug_mode:
+                        clock.tick(0.5)
+                        self.world.draw_global(self.screen, self.players_pose, self.players_reward)
+                        pygame.display.update()
+
+                    elif time.time() - last_updated_time > 0.03:
                         self.world.draw_global(self.screen, self.players_pose, self.players_reward)
                         pygame.display.update()
                         last_updated_time = time.time()
@@ -137,6 +144,7 @@ class GameServer(object):
                     for event in pygame.event.get():
                         if event.type == pygame.QUIT or event.type == pygame.locals.QUIT:
                             pygame.quit()
+
                     pygame.display.update()
 
                 readable, writable, exceptional = (

@@ -25,41 +25,41 @@ class Bot(object):
 
     def run(self):
 
-        clock = pygame.time.Clock()
-        tickspeed = 100
+        #clock = pygame.time.Clock()
+        #tickspeed = 1000
 
         self.conn.sendto("cb".encode('utf-8'), (self.addr, self.serverport))
 
         while self.running:
-            clock.tick(tickspeed)
+            # clock.tick(tickspeed)
 
             # select on specified file descriptors
-            readable, writable, exceptional = (
-                select.select(self.read_list, self.write_list, [], 0)
-            )
+            # readable, writable, exceptional = (
+            #    select.select(self.read_list, self.write_list, [], 0)
+            # )
 
 
+            #self_pos = None
+            #for f in readable:
+            #    if f is self.conn:
+            msg, addr = self.conn.recvfrom(2048)
+            msg = msg.decode('utf-8')  # Coordinates of all players
+            AllZombiePose = []
             self_pos = None
-            for f in readable:
-                if f is self.conn:
-                    msg, addr = f.recvfrom(2048)
-                    msg = msg.decode('utf-8')  # Coordinates of all players
-                    AllZombiePose = []
 
-                    for position in msg.split('|'):
-                        x, y, angle, tag = position.split(',')
-                        x = float(x)
-                        y = float(y)
-                        angle = float(angle)
-                        tag = int(tag)
-                        if self_pos is None:
-                            self_pos = (x, y, angle)
-                        if tag == 0:
-                            AllZombiePose.append((x, y, angle))
+            for position in msg.split('|'):
+                x, y, angle, tag = position.split(',')
+                x = float(x)
+                y = float(y)
+                angle = float(angle)
+                tag = int(tag)
+                if self_pos is None:
+                    self_pos = (x, y, angle)
+                if tag == 0:
+                    AllZombiePose.append((x, y, angle))
 
             if self_pos is not None:
                 movement = self.dummy_escape_policy(self_pos, AllZombiePose)
-                # send policy every 2 frame
                 self.conn.sendto(movement.encode('utf-8'), (self.addr, self.serverport))
 
     def dummy_escape_policy(self, self_pos, zombies):
