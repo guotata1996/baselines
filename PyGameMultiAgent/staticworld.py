@@ -79,7 +79,7 @@ class StaticWorld:
                 rew = rewards_dict[addr]
                 lo_rew_color = np.array([0, 0, 255])
                 hi_rew_color = np.array([255, 0, 0])
-                rew = np.clip(rew, -1, 1)
+                rew = np.clip(rew, 0, 1)
                 interpolated_color = (1 - rew) * lo_rew_color + rew * hi_rew_color
 
                 pygame.draw.circle(screen, interpolated_color, actor_position, int(self.zoom * self.perception_grids), 1)

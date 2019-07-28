@@ -95,7 +95,6 @@ class ZombieChasePlayerEnv(Env):
                     closest_dist_sqr = dist_sqr
         return np.sqrt(closest_dist_sqr)
 
-
     #returns (obs, reward, finish)
     def step(self, action):
         cmd = None
@@ -108,6 +107,15 @@ class ZombieChasePlayerEnv(Env):
         else:
             cmd = "ur"
         cmd += str(self.saved_rew)
+
+        # For Manual debugging
+
+        # if self.saved_self_pose is not None:
+        #     print(self.saved_self_pose)
+        #     print(self.world.to_local_radar_obs(self.saved_self_pose, self.saved_all_zombie_pose)[:, 0])
+        #     cmd = input('please input cmd')
+        # else:
+        #     cmd = 'ui'
         self.conn.sendto(cmd.encode('utf-8'), (self.addr, self.serverport))
 
         self_pos, AllZombiePos = self._fetch_pos_from_server()
@@ -116,11 +124,12 @@ class ZombieChasePlayerEnv(Env):
         self.saved_all_zombie_pose = AllZombiePos
         self.saved_rew = rew
 
-        if done or self.stepcount == 4000:
-            self.reset()
+        #if done or self.stepcount == 4000:
+        #    self.reset()
+
+        done = done or self.stepcount == 4000
 
         self.stepcount += 1
-
 
         # return self.world.to_local_obs(self_pos, AllZombiePos), rew, done, {'episode': {'r':rew, 'l':self.stepcount}}
         return self.world.to_local_radar_obs(self_pos, AllZombiePos), rew, done, {'episode': {'r': rew, 'l': self.stepcount}}

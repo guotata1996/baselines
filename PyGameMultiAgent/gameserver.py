@@ -27,14 +27,14 @@ import sys
 # pos: x,y,angle,tag (tag==0: zombie_model, tag==1:bot)
 
 class GameServer(object):
-    def __init__(self, port=9009, debug_mode = False):
+    def __init__(self, port=9009, visualize = False):
         self.listener = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         # Bind to localhost - set to external ip to connect from other computers
         self.listener.bind(("127.0.0.1", port))
         self.read_list = [self.listener]
         self.write_list = []
 
-        self.angle_stepsize = 0.1
+        self.angle_stepsize = 0.5
         self.players_pose = {}
         self.players_ready = {}
         self.players_reward = {}
@@ -42,8 +42,7 @@ class GameServer(object):
         self.world = StaticWorld('../Maps/map_0.csv')
 
         self.screen = pygame.display.set_mode((self.world.zoom * self.world.length, self.world.zoom * self.world.width)) \
-            if sys.platform.startswith('win') else None
-        self.debug_mode = debug_mode and sys.platform.startswith('win')
+            if sys.platform.startswith('win') and visualize else None
 
 
     def do_movement(self, mv, player):
@@ -105,7 +104,17 @@ class GameServer(object):
         for k in zip(self.players_pose.keys(), start_position):
             self.players_pose[k[0]] = *(k[1]), self.players_pose[k[0]][3]
 
-    def _send_to_client(self):
+    def _send_to_client(self, addr = None):
+        if addr is not None:
+            send = []
+            for pos in list(self.players_pose):
+                if pos == addr:
+                    send.insert(0, "{0},{1},{2},{3}".format(*self.players_pose[pos]))
+                else:
+                    send.append("{0},{1},{2},{3}".format(*self.players_pose[pos]))
+            self.listener.sendto('|'.join(send).encode('utf-8'), addr)
+            return
+
         for player in list(self.players_pose):
             send = []
             for pos in list(self.players_pose):
@@ -122,12 +131,7 @@ class GameServer(object):
             while True:
 
                 if self.screen is not None:
-                    if self.debug_mode:
-                        clock.tick(0.5)
-                        self.world.draw_global(self.screen, self.players_pose, self.players_reward)
-                        pygame.display.update()
-
-                    elif time.time() - last_updated_time > 0.03:
+                    if time.time() - last_updated_time > 0.03:
                         self.world.draw_global(self.screen, self.players_pose, self.players_reward)
                         pygame.display.update()
                         last_updated_time = time.time()
@@ -168,14 +172,16 @@ class GameServer(object):
                                     del self.players_pose[addr]
                                     del self.players_ready[addr]
                             elif cmd == "r":
-                                self.players_ready[addr] = True
+                                #self.players_ready[addr] = True
                                 self.init_players_pose()
+                                self._send_to_client(addr)
                             else:
                                 print ("Unexpected: {0}".format(msg))
 
                             allready = all(elem for elem in self.players_ready.values())
                             if allready:
                                 self._send_to_client()
+                                self.players_ready = dict.fromkeys(self.players_ready, False)
 
 
         except KeyboardInterrupt as e:
