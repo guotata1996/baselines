@@ -64,8 +64,8 @@ class ZombieChasePlayerEnv(Env):
         if last_allZombiePose is None:
             return 0, False
 
-        old_distance = self._get_closest_bot_distance(last_self_pose, last_allZombiePose)
-        curr_distance = self._get_closest_bot_distance(self_pos, AllZombiePose)
+        old_distance, _ = self._get_closest_bot_distance(last_self_pose, last_allZombiePose)
+        curr_distance, _ = self._get_closest_bot_distance(self_pos, AllZombiePose)
 
         rew = 0
 
@@ -74,15 +74,18 @@ class ZombieChasePlayerEnv(Env):
             if curr_distance < old_distance:
                 rew += (old_distance - curr_distance) * 0.5
 
-        # reward for moving
+        # reward for moving , weight 0.1 => 0.05
         old_x, old_y, _ = last_self_pose
         x, y, _ = self_pos
         dist = np.sqrt(np.square(x - old_x) + np.square(y - old_y))
-        rew += dist * 0.1   # range[0, 0.1]
+        rew += dist * 0.01   # range[0, 0.05]
 
         # reward for staying near
         if curr_distance < Bot.alertRadius:
-            rew += 0.5 / min(curr_distance - 2, 1)
+            blocked_distance = self._projection_blocking_distance(self_pos, AllZombiePose)
+            clipped_curr_distance = max(2, curr_distance)
+
+            rew += (1 / max(2, blocked_distance) - 1 / clipped_curr_distance)
 
         # reward for catching
         if curr_distance < 2:
@@ -91,16 +94,39 @@ class ZombieChasePlayerEnv(Env):
 
         return rew, False
 
+    def _projection_blocking_distance(self, self_pos, allActorPose):
+        x, y, angle = self_pos
+        distance, target = self._get_closest_bot_distance(self_pos, allActorPose)
+        if distance > self.world.perception_grids or target is None:
+            return 0
+
+        target_x, target_y, _, _ = target
+        me_to_target = np.asarray([target_x - x, target_y - y])
+        me_to_target_unit = me_to_target / np.linalg.norm(me_to_target)
+
+        maximum_proj_length = 0
+
+        for actor in allActorPose:
+            ax, ay, aa, atag = actor
+            if atag == 0 and (x != ax or y != ay):
+                actor_to_target = np.asarray([target_x - ax, target_y - ay])
+                actor_proj_len = np.dot(me_to_target_unit, actor_to_target)
+                if 0 < actor_proj_len < distance:
+                    maximum_proj_length = max(maximum_proj_length, actor_proj_len)
+        return maximum_proj_length
+
     def _get_closest_bot_distance(self, self_pos, allZombiePose):
         x, y, _ = self_pos
         closest_dist_sqr = 100000000
+        target_actor = None
         for actor in allZombiePose:
             ax, ay, _, atag = actor
             if atag == 1:
                 dist_sqr = (ax - x)**2 + (ay - y)**2
                 if dist_sqr < closest_dist_sqr:
                     closest_dist_sqr = dist_sqr
-        return np.sqrt(closest_dist_sqr)
+                    target_actor = actor
+        return np.sqrt(closest_dist_sqr), target_actor
 
     #returns (obs, reward, finish)
     def step(self, action):
@@ -113,6 +139,7 @@ class ZombieChasePlayerEnv(Env):
             cmd = "ul"
         else:
             cmd = "ur"
+        cmd += "|"
         cmd += str(self.saved_rew)
 
         # For Manual debugging

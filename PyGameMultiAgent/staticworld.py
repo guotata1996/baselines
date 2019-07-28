@@ -6,7 +6,7 @@ import pygame
 #Passable = 0 Wall = 1 #Zombie = 2
 
 class StaticWorld:
-    gridLength = 2  # how many GRIDs does a grid in csv map represent
+    gridLength = 1  # how many GRIDs does a grid in csv map represent
     perception_grids = 15 # how far in GRIDs can actor see
     zoom = 8
 

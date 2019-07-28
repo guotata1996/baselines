@@ -46,17 +46,24 @@ class GameServer(object):
         self.screen = pygame.display.set_mode((self.world.zoom * self.world.length, self.world.zoom * self.world.width)) \
             if sys.platform.startswith('win') and visualize else None
 
-
-    def do_movement(self, mv, player):
-
+    # mv is in format [l/r/u][(optional)float]
+    def do_movement(self, move, player):
         pos = self.players_pose[player]
-        if self.players_pose[player][3] == 0:
-            stepsize = 1
-            angle_stepsize = 0.5
-        else:
-            stepsize = 2
-            angle_stepsize = 0.5
+        mv = move[0]
 
+        if len(move) > 1:
+            stepsize = float(move[1:])
+        else:
+            if self.players_pose[player][3] == 0:
+                if mv == "u":
+                    stepsize = 1
+                else:
+                    stepsize = 0.5
+            else:
+                if mv == "u":
+                    stepsize = 2
+                else:
+                    stepsize = 0.5
 
         if mv == "u":
             angle = pos[2]
@@ -69,13 +76,13 @@ class GameServer(object):
                 self.players_pose[player] = new_pos
 
         elif mv == "l":
-            angle = pos[2] + angle_stepsize
+            angle = pos[2] + stepsize
             if angle > 2 * PI:
                 angle -= 2 * PI
             self.players_pose[player] = (pos[0], pos[1], angle, pos[3])
 
         elif mv == "r":
-            angle = pos[2] - angle_stepsize
+            angle = pos[2] - stepsize
             if angle < 0:
                 angle += 2 * PI
             self.players_pose[player] = (pos[0], pos[1], angle, pos[3])
@@ -179,13 +186,20 @@ class GameServer(object):
 
                                 self.players_ready[addr] = True
                                 self.init_players_pose()
-                            elif cmd == "u":  # Movement Update
+                            elif cmd == "u":
+                                # Movement Update  ul0.3|0.5
+                                # left 0.3, reward 0.5
                                 if len(msg) >= 2 and addr in self.players_pose:
-                                    # Second char of message is direction (udlr)
-                                    self.do_movement(msg[1], addr)
+                                    if "|" in msg:
+                                        msg_mv, msg_rew = msg[1:].split('|')
+                                    else:
+                                        msg_mv = msg[1:]
+                                        msg_rew = None
+
+                                    self.do_movement(msg_mv, addr)
                                     self.players_ready[addr] = True
-                                    if len(msg) > 2:
-                                        self.players_reward[addr] = float(msg[2:])
+                                    if msg_rew is not None:
+                                        self.players_reward[addr] = float(msg_rew)
 
                             elif cmd == "d":  # Player Quitting
                                 if addr in self.players_pose:

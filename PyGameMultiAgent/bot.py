@@ -3,7 +3,7 @@ import socket
 import pygame
 import signal
 import select
-from math import atan2, degrees
+from math import atan2, degrees, radians
 import sys
 from baselines.PyGameMultiAgent.staticworld import StaticWorld
 
@@ -74,7 +74,6 @@ class Bot(object):
 
             if z_distance_sqr < Bot.alertRadius * Bot.alertRadius:
                 zombie_in_sight = True
-
         if not zombie_in_sight:
             return "ui"
 
@@ -94,10 +93,15 @@ class Bot(object):
         if dir_score[now_heading_index] == max(dir_score):
             return "uu"
         else:
-            if best_index - now_heading_index < -12 or 0 < best_index - now_heading_index < 12:
-                return "ul"
+            # if best_index - now_heading_index < -12 or 0 < best_index - now_heading_index < 12:
+            #     return "ul"
+            # else:
+            #     return "ur"
+            angle_diff_rad = radians(abs(best_index - now_heading_index) * 15)
+            if best_index > now_heading_index:
+                return "ul" + str(angle_diff_rad)
             else:
-                return "ur"
+                return "ur" + str(angle_diff_rad)
 
 
 if __name__ == "__main__":
