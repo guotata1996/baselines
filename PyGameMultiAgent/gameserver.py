@@ -8,8 +8,6 @@ import pygame
 import pygame.locals
 import time
 import sys
-import _thread
-import sys
 
 # Messages:
 #  Client->Server
@@ -27,18 +25,22 @@ import sys
 # pos: x,y,angle,tag (tag==0: zombie_model, tag==1:bot)
 
 class GameServer(object):
-    def __init__(self, port=9009, visualize = False):
+    map_count = 1
+
+    def __init__(self, port=9009, visualize = True):
+        print(time.asctime(time.localtime(time.time())))
+
         self.listener = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         # Bind to localhost - set to external ip to connect from other computers
         self.listener.bind(("127.0.0.1", port))
         self.read_list = [self.listener]
         self.write_list = []
 
-        self.angle_stepsize = 0.5
         self.players_pose = {}
         self.players_ready = {}
         self.players_reward = {}
 
+        self.map_index = 0
         self.world = StaticWorld('../Maps/map_0.csv')
 
         self.screen = pygame.display.set_mode((self.world.zoom * self.world.length, self.world.zoom * self.world.width)) \
@@ -50,8 +52,11 @@ class GameServer(object):
         pos = self.players_pose[player]
         if self.players_pose[player][3] == 0:
             stepsize = 1
+            angle_stepsize = 0.5
         else:
-            stepsize = 0.5
+            stepsize = 2
+            angle_stepsize = 0.5
+
 
         if mv == "u":
             angle = pos[2]
@@ -64,13 +69,13 @@ class GameServer(object):
                 self.players_pose[player] = new_pos
 
         elif mv == "l":
-            angle = pos[2] + self.angle_stepsize
+            angle = pos[2] + angle_stepsize
             if angle > 2 * PI:
                 angle -= 2 * PI
             self.players_pose[player] = (pos[0], pos[1], angle, pos[3])
 
         elif mv == "r":
-            angle = pos[2] - self.angle_stepsize
+            angle = pos[2] - angle_stepsize
             if angle < 0:
                 angle += 2 * PI
             self.players_pose[player] = (pos[0], pos[1], angle, pos[3])
@@ -79,30 +84,44 @@ class GameServer(object):
             pass
 
     def init_players_pose(self):
-        section_x = [(0, self.world.width // 2), (self.world.width // 2, self.world.width)][np.random.randint(0, 2)]
-        section_y = [(0, self.world.length // 2), (self.world.length // 2, self.world.length)][np.random.randint(0, 2)]
+        while True:
+            self.map_index = np.random.randint(0, self.map_count)
+            del self.world
+            self.world = StaticWorld("../Maps/map_{0}.csv".format(self.map_index))
+            section_x = [(0, self.world.width // 2), (self.world.width // 2, self.world.width)][np.random.randint(0, 2)]
+            section_y = [(0, self.world.length // 2), (self.world.length // 2, self.world.length)][np.random.randint(0, 2)]
 
-        start_position = []
+            start_position = []
 
-        for p in range(len(self.players_pose)):
-            while True:
-                new_pose = (np.random.randint(*section_x), np.random.randint(*section_y), np.random.random() * 2 * PI)
+            for p in range(len(self.players_pose)):
+                trial_cnt = 0
+                while trial_cnt < 5:
+                    new_pose = (np.random.randint(*section_x), np.random.randint(*section_y), np.random.random() * 2 * PI)
 
-                if self.world[(new_pose[0], new_pose[1])] == 1:
-                    continue
+                    if self.world[(new_pose[0], new_pose[1])] == 1:
+                        continue
 
-                noncollision = True
-                for existing_pose in start_position:
-                    if abs(existing_pose[0] - new_pose[0]) + abs(existing_pose[1] - new_pose[1]) < 8:
-                        noncollision = False
+                    noncollision = True
+                    for existing_pose in start_position:
+                        if abs(existing_pose[0] - new_pose[0]) + abs(existing_pose[1] - new_pose[1]) < 8:
+                            noncollision = False
+                            break
+
+                    if noncollision:
+                        start_position.append(new_pose)
                         break
 
-                if noncollision:
-                    start_position.append(new_pose)
+                    trial_cnt += 1
+
+                # If cannot find a suitable location for a new player, move to new map
+                if trial_cnt == 5:
                     break
 
-        for k in zip(self.players_pose.keys(), start_position):
-            self.players_pose[k[0]] = *(k[1]), self.players_pose[k[0]][3]
+            # If all playerStarts are ready, break from main loop
+            if len(start_position) == len(self.players_pose):
+                for k in zip(self.players_pose.keys(), start_position):
+                    self.players_pose[k[0]] = *(k[1]), self.players_pose[k[0]][3]
+                break
 
     def _send_to_client(self, addr = None):
         if addr is not None:
@@ -112,21 +131,22 @@ class GameServer(object):
                     send.insert(0, "{0},{1},{2},{3}".format(*self.players_pose[pos]))
                 else:
                     send.append("{0},{1},{2},{3}".format(*self.players_pose[pos]))
-            self.listener.sendto('|'.join(send).encode('utf-8'), addr)
-            return
 
-        for player in list(self.players_pose):
-            send = []
-            for pos in list(self.players_pose):
-                if player == pos:
-                    send.insert(0, "{0},{1},{2},{3}".format(*self.players_pose[pos]))
-                else:
-                    send.append("{0},{1},{2},{3}".format(*self.players_pose[pos]))
-            self.listener.sendto('|'.join(send).encode('utf-8'), player)
+            send.append(str(self.map_index))
+            self.listener.sendto('|'.join(send).encode('utf-8'), addr)
+        else:
+            for player in list(self.players_pose):
+                send = []
+                for pos in list(self.players_pose):
+                    if player == pos:
+                        send.insert(0, "{0},{1},{2},{3}".format(*self.players_pose[pos]))
+                    else:
+                        send.append("{0},{1},{2},{3}".format(*self.players_pose[pos]))
+                send.append(str(self.map_index))
+                self.listener.sendto('|'.join(send).encode('utf-8'), player)
 
     def run(self):
         last_updated_time = time.time()
-        clock = pygame.time.Clock()
         try:
             while True:
 
@@ -172,7 +192,6 @@ class GameServer(object):
                                     del self.players_pose[addr]
                                     del self.players_ready[addr]
                             elif cmd == "r":
-                                #self.players_ready[addr] = True
                                 self.init_players_pose()
                                 self._send_to_client(addr)
                             else:

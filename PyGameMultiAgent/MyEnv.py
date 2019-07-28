@@ -14,6 +14,7 @@ import time
 class ZombieChasePlayerEnv(Env):
 
     def __init__(self):
+        self.map_index = 0
         self.world = StaticWorld('Maps/map_0.csv')
         self.clientport = random.randrange(8000, 8999)
         self.conn = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -38,20 +39,26 @@ class ZombieChasePlayerEnv(Env):
     def _fetch_pos_from_server(self):
         msg, addr = self.conn.recvfrom(2048)
         msg = msg.decode('utf-8')  # Coordinates of all players
-        self_pos = None
-        AllZombiePose = []
 
-        for position in msg.split('|'):
+        splitted_msg = msg.split('|')
+        x, y, a, _ = splitted_msg[0].split(',')
+        x = float(x)
+        y = float(y)
+        a = float(a)
+        self_pos = (x, y, a)
+
+        AllZombiePose = []
+        for position in splitted_msg[1:-1]:
             x, y, angle, tag = position.split(',')
             x = float(x)
             y = float(y)
             angle = float(angle)
             tag = int(tag)
-            if self_pos is None:
-                self_pos = (x, y, angle)
             AllZombiePose.append((x, y, angle, tag))
 
-        return self_pos, AllZombiePose
+        map_index = int(splitted_msg[-1])
+
+        return self_pos, AllZombiePose, map_index
 
     def _calculate_reward(self, self_pos, AllZombiePose, last_self_pose, last_allZombiePose):
         if last_allZombiePose is None:
@@ -118,7 +125,12 @@ class ZombieChasePlayerEnv(Env):
         #     cmd = 'ui'
         self.conn.sendto(cmd.encode('utf-8'), (self.addr, self.serverport))
 
-        self_pos, AllZombiePos = self._fetch_pos_from_server()
+        self_pos, AllZombiePos, server_map_index = self._fetch_pos_from_server()
+        if self.map_index != server_map_index:
+            del self.world
+            self.world = StaticWorld("Maps/map_{0}.csv".format(server_map_index))
+            self.map_index = server_map_index
+
         rew, done = self._calculate_reward(self_pos, AllZombiePos, self.saved_self_pose, self.saved_all_zombie_pose)
         self.saved_self_pose = self_pos
         self.saved_all_zombie_pose = AllZombiePos
@@ -136,7 +148,12 @@ class ZombieChasePlayerEnv(Env):
 
     def reset(self):
         self.conn.sendto("r".encode('utf-8'), (self.addr, self.serverport))
-        self_pos, AllZombiePos = self._fetch_pos_from_server()
+        self_pos, AllZombiePos, server_map_index = self._fetch_pos_from_server()
+        if self.map_index != server_map_index:
+            del self.world
+            self.world = StaticWorld("Maps/map_{0}.csv".format(server_map_index))
+            self.map_index = server_map_index
+
         self.stepcount = 0
         return self.world.to_local_radar_obs(self_pos, AllZombiePos)
 
