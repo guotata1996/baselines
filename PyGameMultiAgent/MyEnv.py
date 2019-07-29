@@ -72,20 +72,21 @@ class ZombieChasePlayerEnv(Env):
         # reward for approaching target
         if max(old_distance, curr_distance) < self.world.perception_grids:
             if curr_distance < old_distance:
-                rew += (old_distance - curr_distance) * 0.5
+                rew += (old_distance - curr_distance) * 0.01
 
         # reward for moving , weight 0.1 => 0.05
-        old_x, old_y, _ = last_self_pose
-        x, y, _ = self_pos
-        dist = np.sqrt(np.square(x - old_x) + np.square(y - old_y))
-        rew += dist * 0.01   # range[0, 0.05]
+        # old_x, old_y, _ = last_self_pose
+        # x, y, _ = self_pos
+        # dist = np.sqrt(np.square(x - old_x) + np.square(y - old_y))
+        # rew += dist * 0.01   # range[0, 0.05]
 
         # reward for staying near
         if curr_distance < Bot.alertRadius:
             blocked_distance = self._projection_blocking_distance(self_pos, AllZombiePose)
             clipped_curr_distance = max(2, curr_distance)
+            print(curr_distance, blocked_distance)
 
-            rew += (1 / max(2, blocked_distance) - 1 / clipped_curr_distance)
+            rew += 2 * (1 / max(2, blocked_distance) - 1 / clipped_curr_distance)
 
         # reward for catching
         if curr_distance < 2:
@@ -110,9 +111,10 @@ class ZombieChasePlayerEnv(Env):
             ax, ay, aa, atag = actor
             if atag == 0 and (x != ax or y != ay):
                 actor_to_target = np.asarray([target_x - ax, target_y - ay])
-                actor_proj_len = np.dot(me_to_target_unit, actor_to_target)
-                if 0 < actor_proj_len < distance:
-                    maximum_proj_length = max(maximum_proj_length, actor_proj_len)
+                if np.linalg.norm(actor_to_target) < Bot.alertRadius:
+                    actor_proj_len = np.dot(me_to_target_unit, actor_to_target)
+                    if 0 < actor_proj_len < distance:
+                        maximum_proj_length = max(maximum_proj_length, actor_proj_len)
         return maximum_proj_length
 
     def _get_closest_bot_distance(self, self_pos, allZombiePose):

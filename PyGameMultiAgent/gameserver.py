@@ -27,7 +27,7 @@ import sys
 class GameServer(object):
     map_count = 1
 
-    def __init__(self, port=9009, visualize = True):
+    def __init__(self, port=9009, visualize = False):
         print(time.asctime(time.localtime(time.time())))
 
         self.listener = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -61,7 +61,7 @@ class GameServer(object):
                     stepsize = 0.5
             else:
                 if mv == "u":
-                    stepsize = 2
+                    stepsize = 1.5
                 else:
                     stepsize = 0.5
 

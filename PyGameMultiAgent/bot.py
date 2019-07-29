@@ -8,7 +8,7 @@ import sys
 from baselines.PyGameMultiAgent.staticworld import StaticWorld
 
 class Bot(object):
-    alertRadius = 6
+    alertRadius = 10
 
     def __init__(self, addr="127.0.0.1", serverport=9009):
         self.botport = random.randrange(8000, 8999)
@@ -74,6 +74,7 @@ class Bot(object):
 
             if z_distance_sqr < Bot.alertRadius * Bot.alertRadius:
                 zombie_in_sight = True
+        #input()
         if not zombie_in_sight:
             return "ui"
 
