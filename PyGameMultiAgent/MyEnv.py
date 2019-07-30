@@ -84,9 +84,8 @@ class ZombieChasePlayerEnv(Env):
         if curr_distance < Bot.alertRadius:
             blocked_distance = self._projection_blocking_distance(self_pos, AllZombiePose)
             clipped_curr_distance = max(2, curr_distance)
-            print(curr_distance, blocked_distance)
 
-            rew += 2 * (1 / max(2, blocked_distance) - 1 / clipped_curr_distance)
+            rew += 2 / clipped_curr_distance * (curr_distance - blocked_distance) / curr_distance
 
         # reward for catching
         if curr_distance < 2:
