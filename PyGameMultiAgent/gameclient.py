@@ -23,7 +23,7 @@ class GameClient(object):
 
     def setup_pygame(self):
 
-        self.world = StaticWorld('../Maps/map_0.csv')
+        self.world = StaticWorld('../Maps/map_1.csv')
 
         self.screen = pygame.display.set_mode((self.world.local_width * self.world.zoom, self.world.local_length * self.world.zoom))
 
@@ -56,7 +56,7 @@ class GameClient(object):
                         self_pos = None
                         AllZombiePose = []
 
-                        for position in msg.split('|'):
+                        for position in msg.split('|')[:-1]:
                             x, y, angle, tag = position.split(',')
                             x = float(x)
                             y = float(y)

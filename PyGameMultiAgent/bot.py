@@ -74,7 +74,7 @@ class Bot(object):
 
             if z_distance_sqr < Bot.alertRadius * Bot.alertRadius:
                 zombie_in_sight = True
-        #input()
+        input()
         if not zombie_in_sight:
             return "ui"
 

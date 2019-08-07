@@ -1,21 +1,51 @@
 Logging to saves/log
 ---------------------------------
 | eplenmean          | 3        |
-| eprewmean          | 0.0127   |
-| explained_variance | -0.135   |
+| eprewmean          | 0        |
+| explained_variance | 0.0832   |
 | fps                | 62       |
 | nupdates           | 1        |
-| policy_entropy     | 0.473    |
+| policy_entropy     | 1.36     |
 | total_timesteps    | 15       |
-| value_loss         | 0.396    |
+| value_loss         | 0.000519 |
 ---------------------------------
 ---------------------------------
 | eplenmean          | 484      |
-| eprewmean          | 0.0027   |
-| explained_variance | -0.135   |
-| fps                | 540      |
+| eprewmean          | 0.0657   |
+| explained_variance | 1        |
+| fps                | 73       |
 | nupdates           | 100      |
-| policy_entropy     | 0.665    |
+| policy_entropy     | 0.838    |
 | total_timesteps    | 1.5e+03  |
-| value_loss         | 0.0389   |
+| value_loss         | 0.0222   |
+---------------------------------
+---------------------------------
+| eplenmean          | 731      |
+| eprewmean          | 0.176    |
+| explained_variance | 0.997    |
+| fps                | 46       |
+| nupdates           | 200      |
+| policy_entropy     | 0.446    |
+| total_timesteps    | 3e+03    |
+| value_loss         | 0.303    |
+---------------------------------
+---------------------------------
+| eplenmean          | 863      |
+| eprewmean          | 0.0583   |
+| explained_variance | 1        |
+| fps                | 51       |
+| nupdates           | 300      |
+| policy_entropy     | 0.919    |
+| total_timesteps    | 4.5e+03  |
+| value_loss         | 0.0179   |
+---------------------------------
+---------------------------------
+| eplenmean          | 744      |
+| eprewmean          | 0        |
+| explained_variance | -2.83    |
+| fps                | 54       |
+| nupdates           | 400      |
+| policy_entropy     | 1.36     |
+| total_timesteps    | 6e+03    |
+| value_loss         | 0.0023   |
 ---------------------------------

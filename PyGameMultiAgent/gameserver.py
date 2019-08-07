@@ -25,9 +25,9 @@ import sys
 # pos: x,y,angle,tag (tag==0: zombie_model, tag==1:bot)
 
 class GameServer(object):
-    map_count = 1
+    map_count = 2
 
-    def __init__(self, port=9009, visualize = False):
+    def __init__(self, port=9009, visualize = True):
         print(time.asctime(time.localtime(time.time())))
 
         self.listener = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
